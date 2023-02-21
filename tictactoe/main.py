@@ -12,7 +12,9 @@ def display(game: Game):
             print('(O)', end='')
         else:
             print(f' {i + 1} ', end='')
-        if (i + 1) % 3 == 0:
+        if i == 8:
+            print()
+        elif (i + 1) % 3 == 0:
             print('\n - + - + -\n', end='')
         else:
             print('|', end='')

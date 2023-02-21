@@ -38,6 +38,14 @@ class Node:
         elif self.result == Game.TIE:
             self.label = Node.TIE
         else:
+            identical = find_node(game.state, head)
+            if identical is not None:
+                # identical node exists somewhere in the tree
+                self.label = identical.label
+                return
+
+            # if the identical node does not exist
+
             # no label yet, need to find label
             self.children: list[Node] = [None for _ in range(9)]
 
@@ -47,15 +55,8 @@ class Node:
                 self.label = Node.WIN
 
             for i in range(9):
-                #
-                if game.state[i] == 0:
-                    # i is not taken
-                    self.children[i] = find_node(game.state, head)
-                    if self.children[i] is None:
-                        self.children[i] = Node(copy.deepcopy(game), i, favour, disfavour, head)
-                else:
-                    self.children[i] = Node(copy.deepcopy(game), i, favour, disfavour, head)
-                #
+                self.children[i] = Node(copy.deepcopy(game), i, favour, disfavour, head)
+
                 if self.children[i].result != Game.INVALID:
                     if self.plr == disfavour:
                         if self.children[i].label > self.label:
@@ -88,11 +89,10 @@ class Node:
 
 
 def find_node(game_state: list[int], head: Node) -> Node:
+    node: Node = head
 
     last_P1 = -1
     last_P2 = -1
-
-    node: Node = head
 
     while True:
         try:
@@ -120,3 +120,4 @@ def find_node(game_state: list[int], head: Node) -> Node:
                 break
 
     return node
+
