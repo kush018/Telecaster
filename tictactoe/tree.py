@@ -38,7 +38,8 @@ class Node:
         elif self.result == Game.TIE:
             self.label = Node.TIE
         else:
-            identical = find_node(game.state, head)
+            rot = get_rot_of_earliest_symmetric_gamestate(game.state)
+            identical = find_node(get_rotated_gamestate(game.state, rot), head)
             if identical is not None:
                 # identical node exists somewhere in the tree
                 self.label = identical.label
@@ -121,3 +122,87 @@ def find_node(game_state: list[int], head: Node) -> Node:
 
     return node
 
+
+def get_rotated_index(i: int, rot: int) -> int:
+    """
+    0 1 2 - rot 0/4
+    3 4 5
+    6 7 8
+
+    6 3 0 - rot 1
+    7 4 1
+    8 5 2
+
+    8 7 6 - rot 2
+    5 4 3
+    2 1 0
+
+    2 5 8 - rot 3
+    1 4 7
+    0 3 6
+    """
+    if rot == 0:
+        return i
+    elif rot == 1:
+        return [6, 3, 0, 7, 4, 1, 8, 5, 2][i]
+    elif rot == 2:
+        return [8, 7, 6, 5, 4, 3, 2, 1, 0][i]
+    elif rot == 3:
+        return [2, 5, 8, 1, 4, 7, 0, 3, 6][i]
+    else:
+        return get_rotated_index(i, rot % 4)
+
+
+def get_rotated_gamestate(state, rot):
+    rotated = [0 for _ in range(9)]
+
+    for i in range(9):
+        rotated[i] = state[get_rotated_index(i, rot)]
+
+    return rotated
+
+
+# returns 0 if both equal; +1, if state1 occurs earlier than state2
+# and -1 if state2 occurs earlier than state1
+def compare_gamestates(state1: list[int], state2: list[int]):
+    last_x = -1
+    last_o = -1
+
+    try:
+        while True:
+            x1 = state1.index(Game.P1, last_x + 1)
+            x2 = state2.index(Game.P1, last_x + 1)
+            if x1 > x2:
+                # x2 is earlier
+                return -1
+            elif x1 < x2:
+                # x1 is earlier
+                return +1
+            # x1 == x2
+            last_x = x1
+
+            o1 = state1.index(Game.P2, last_o + 1)
+            o2 = state2.index(Game.P2, last_o + 1)
+            if o1 > o2:
+                # o2 is earlier
+                return -1
+            elif o1 < o2:
+                # o1 is earlier
+                return +1
+            # o1 == o2
+            last_o = o1
+    except ValueError:
+        return 0
+
+def get_rot_of_earliest_symmetric_gamestate(state):
+    states = list()
+    states.append(state)
+    states.append(get_rotated_gamestate(state, 1))
+    states.append(get_rotated_gamestate(state, 2))
+    states.append(get_rotated_gamestate(state, 3))
+    best_rot = 0
+    for i in range(1, len(states)):
+        if compare_gamestates(states[i], states[best_rot]) > 0:
+            best_rot = i
+
+    return best_rot

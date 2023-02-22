@@ -1,8 +1,22 @@
 from tictactoe.game import Game
-from tictactoe.tree import Node
-import tictactoe.utils as utils
+import tictactoe.tree as tree
 
 import pickle
+
+def get_optimal_move(head: tree.Node, game: Game) -> int:
+    # gets optimal move for current player
+    # assumes the tree is favouring the current player
+    rot = tree.get_rot_of_earliest_symmetric_gamestate(game.state)
+    moves = tree.find_node(tree.get_rotated_gamestate(game.state, rot), head).children
+    best_label = -99999999
+    best_i = -1
+    for i in range(9):
+        if moves[i] is not None:
+            if moves[i].label > best_label:
+                best_label = moves[i].label
+                best_i = i
+
+    return best_i
 
 def display(game: Game):
     for i in range(9):
@@ -65,10 +79,10 @@ def main():
             result = turn_player(game)
             if result == 0:
                 # normal result
-                result = game.play(utils.get_optimal_move(head, game))
+                result = game.play(get_optimal_move(head, game))
         else:
             # computer is X
-            result = game.play(utils.get_optimal_move(head, game))
+            result = game.play(get_optimal_move(head, game))
             if result == 0:
                 # normal result
                 result = turn_player(game)
