@@ -6,15 +6,25 @@ import os
 
 
 def get_optimal_move(head: tree.Node, game: Game) -> int:
+    # favours the current turn
+    favour = game.cp
+
     # gets optimal move for current player
-    # assumes the tree is favouring the current player
+    # assumes the tree is favouring Game.P1
     rot = tree.get_rot_of_earliest_symmetric_gamestate(game.state)
     moves = tree.find_node(tree.get_rotated_gamestate(game.state, rot), head).children
-    best_label = -99999999
-    best_i = -1
+    if favour == Game.P1:
+        # finds best label
+        best_i = -1
+        best_label = -99999999
+    else:
+        # finds worst label
+        best_i = -1
+        best_label = 99999999
     for i in range(9):
         if moves[i] is not None:
-            if moves[i].label > best_label:
+            if (favour == Game.P1 and moves[i].label > best_label) or (
+                    favour == Game.P2 and moves[i].label < best_label):
                 best_label = moves[i].label
                 best_i = i
 
@@ -67,24 +77,14 @@ def main():
         else:
             print('Invalid choice. Enter either X or O.')
 
-    if player == Game.P1:
-        # tree that favours P2
-        if os.path.isfile('..\\tree_P2.object'):
-            with open('..\\tree_P2.object', 'rb') as inp:
-                head = pickle.load(inp)
-        else:
-            head = tree.Node(Game(), None, Game.P2, Game.P1, None)
-            with open('..\\tree_P2.object', 'wb') as outp:
-                pickle.dump(head, outp, -1)
+    # default tree (favours P1)
+    if os.path.isfile('..\\decision_tree.object'):
+        with open('..\\decision_tree.object', 'rb') as inp:
+            head = pickle.load(inp)
     else:
-        # tree that favours P1
-        if os.path.isfile('..\\tree_P1.object'):
-            with open('..\\tree_P1.object', 'rb') as inp:
-                head = pickle.load(inp)
-        else:
-            head = tree.Node(Game(), None, Game.P1, Game.P2, None)
-            with open('..\\tree_P1.object', 'wb') as outp:
-                pickle.dump(head, outp, -1)
+        head = tree.Node(Game(), None, Game.P1, Game.P2, None)
+        with open('..\\decision_tree.object', 'wb') as outp:
+            pickle.dump(head, outp, -1)
 
     game = Game()
 
@@ -115,7 +115,3 @@ def main():
             display(game)
             print('Computer has won!!')
             break
-
-
-if __name__ == '__main__':
-    main()
