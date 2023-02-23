@@ -2,6 +2,8 @@ from tictactoe.game import Game
 import tictactoe.tree as tree
 
 import pickle
+import os
+
 
 def get_optimal_move(head: tree.Node, game: Game) -> int:
     # gets optimal move for current player
@@ -16,7 +18,8 @@ def get_optimal_move(head: tree.Node, game: Game) -> int:
                 best_label = moves[i].label
                 best_i = i
 
-    return best_i
+    return tree.get_rotated_index(best_i, rot - 4)
+
 
 def display(game: Game):
     for i in range(9):
@@ -32,6 +35,7 @@ def display(game: Game):
             print('\n - + - + -\n', end='')
         else:
             print('|', end='')
+
 
 def turn_player(game: Game):
     # assuming current turn is players turn
@@ -50,6 +54,7 @@ def turn_player(game: Game):
         except ValueError:
             print('Invalid move')
 
+
 def main():
     while True:
         ch = input('Play as X or O?\n')
@@ -64,12 +69,22 @@ def main():
 
     if player == Game.P1:
         # tree that favours P2
-        with open('..\\tree_P2.object', 'rb') as inp:
-            head = pickle.load(inp)
+        if os.path.isfile('..\\tree_P2.object'):
+            with open('..\\tree_P2.object', 'rb') as inp:
+                head = pickle.load(inp)
+        else:
+            head = tree.Node(Game(), None, Game.P2, Game.P1, None)
+            with open('..\\tree_P2.object', 'wb') as outp:
+                pickle.dump(head, outp, -1)
     else:
         # tree that favours P1
-        with open('..\\tree_P1.object', 'rb') as inp:
-            head = pickle.load(inp)
+        if os.path.isfile('..\\tree_P1.object'):
+            with open('..\\tree_P1.object', 'rb') as inp:
+                head = pickle.load(inp)
+        else:
+            head = tree.Node(Game(), None, Game.P1, Game.P2, None)
+            with open('..\\tree_P1.object', 'wb') as outp:
+                pickle.dump(head, outp, -1)
 
     game = Game()
 
