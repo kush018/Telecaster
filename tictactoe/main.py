@@ -78,12 +78,12 @@ def main():
             print('Invalid choice. Enter either X or O.')
 
     # default tree (favours P1)
-    if os.path.isfile('..\\decision_tree.object'):
-        with open('..\\decision_tree.object', 'rb') as inp:
+    if os.path.isfile('decision_tree.object'):
+        with open('decision_tree.object', 'rb') as inp:
             head = pickle.load(inp)
     else:
         head = tree.Node(Game(), None, Game.P1, Game.P2, None)
-        with open('..\\decision_tree.object', 'wb') as outp:
+        with open('decision_tree.object', 'wb') as outp:
             pickle.dump(head, outp, -1)
 
     game = Game()
